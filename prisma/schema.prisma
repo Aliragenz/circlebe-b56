@@ -1,0 +1,94 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model User {
+  id Int @id @default(autoincrement())
+
+  email     String   @unique
+  image     String?
+  bannerImg String?
+  fullName  String?
+  userName  String?
+  bio       String?
+  password  String
+  role      RoleEnum @default(MEMBER)
+  threads   Thread[]
+  // Likes     Likes[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // following Follows[] @relation("following")
+  // follower  Follows[] @relation("follower")
+
+  @@map("users")
+}
+
+model Thread {
+  id Int @id @default(autoincrement())
+
+  content      String
+  image        String?
+  likesCount   Int     @default(0)
+  repliesCount Int     @default(0)
+  threadId     Int?
+  likedBy      Int[]
+  userId       Int
+  // Likes        Likes[]
+  // images ThreadImages[]
+
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user User @relation(fields: [userId], references: [id])
+  // replies Thread[] @relation("replies")
+  // thread  Thread?  @relation("replies", fields: [threadId], references: [id])
+
+  @@map("threads")
+}
+
+// model ThreadImages {
+//   id       Int    @id @default(autoincrement())
+//   url      String
+//   threadId Int
+
+//   // thread Thread @relation(fields: [threadId], references: [id])
+// }
+
+// model Likes {
+//   userId   Int
+//   threadId Int
+
+//   user   User   @relation(fields: [userId], references: [id])
+//   thread Thread @relation(fields: [threadId], references: [id])
+
+//   @@id([userId, threadId])
+// }
+
+// model Follows {
+//   followingId Int
+//   followerId  Int
+
+//   following User @relation("following", fields: [followingId], references: [id])
+//   follower  User @relation("follower", fields: [followerId], references: [id])
+
+//   @@id([followerId, followingId])
+// }
+
+enum RoleEnum {
+  ADMIN
+  MEMBER
+}
